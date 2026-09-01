@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<title>Ansha's Donuts</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0e1620" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Ansha's Donuts" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/favicon.png" />
+<link rel="apple-touch-icon" href="icons/favicon.png" />
+<style>
+  :root {
+    --bg: #0e1620;
+    --panel: #16223a;
+    --panel-2: #1c2c4a;
+    --line: #2a3b52;
+    --text: #f2f6ff;
+    --text-dim: #9fb0d1;
+    --text-faint: #62729a;
+    --accent: #3fa6ff;
+    --good: #4fd8a4;
+    --bad: #ff7a68;
+
+    --sweet: #ff6fb0;
+    --spicy: #ff7a4d;
+    --sour: #c6e04a;
+    --bitter: #8f9fff;
+    --fresh: #4fd8d8;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    padding: 24px 14px 56px;
+  }
+
+  .wrap { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 14px; }
+
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 0 0 8px; color: var(--text); }
+  .subtitle { color: var(--text-dim); font-size: 14px; margin: 0; line-height: 1.5; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .note {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .note b { color: var(--text); }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+  .tab-btn {
+    flex: 1;
+    font: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-dim);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+  }
+  .tab-btn.active { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .subtabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 2px; }
+  .subtab-btn {
+    flex-shrink: 0;
+    font: inherit;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--text-dim);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .subtab-btn.active { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+
+  .subview { display: none; }
+  .subview.active { display: block; }
+
+  .controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .search-input {
+    flex: 1;
+    min-width: 140px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 9px 12px;
+  }
+  .search-input::placeholder { color: var(--text-faint); }
+  .toggle-btn {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--panel-2);
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    padding: 9px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .toggle-btn:hover { border-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 6px; text-align: center; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th {
+    color: var(--text-dim);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    user-select: none;
+    position: sticky;
+    top: 0;
+    background: var(--panel);
+  }
+  thead th:hover { color: var(--text); }
+  thead th.sorted { color: var(--accent); }
+  tbody tr { border-bottom: 1px solid var(--line); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td.name { color: var(--text); font-weight: 600; }
+
+  .berry-icon { width: 20px; height: 20px; vertical-align: middle; margin-right: 6px; object-fit: contain; }
+  .table-scroll { overflow-x: auto; max-height: 560px; overflow-y: auto; }
+
+  .flavor-cell { color: var(--text-dim); }
+  .flavor-cell.hi { color: var(--text); font-weight: 700; }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    color: #0e1620;
+  }
+  .badge.sweet { background: var(--sweet); }
+  .badge.spicy { background: var(--spicy); }
+  .badge.sour { background: var(--sour); }
+  .badge.bitter { background: var(--bitter); }
+  .badge.fresh { background: var(--fresh); }
+
+  .flavor-groups { display: flex; flex-direction: column; gap: 10px; }
+  .flavor-group {
+    border-radius: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+  }
+  .flavor-group.sweet { background: #2a1e28; border-color: rgba(255, 111, 176, 0.4); }
+  .flavor-group.spicy { background: #2a1f18; border-color: rgba(255, 122, 77, 0.4); }
+  .flavor-group.sour { background: #212a18; border-color: rgba(198, 224, 74, 0.35); }
+  .flavor-group.bitter { background: #1c1e34; border-color: rgba(143, 159, 255, 0.4); }
+  .flavor-group.fresh { background: #102723; border-color: rgba(79, 216, 216, 0.4); }
+
+  .flavor-group-title { font-weight: 800; font-size: 14px; margin-bottom: 8px; }
+  .flavor-group.sweet .flavor-group-title { color: var(--sweet); }
+  .flavor-group.spicy .flavor-group-title { color: var(--spicy); }
+  .flavor-group.sour .flavor-group-title { color: var(--sour); }
+  .flavor-group.bitter .flavor-group-title { color: var(--bitter); }
+  .flavor-group.fresh .flavor-group-title { color: var(--fresh); }
+
+  .power-row { padding: 6px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+  .power-row:first-of-type { border-top: none; }
+  .power-name { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+  .power-levels { display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--text-dim); }
+  .power-levels span { background: rgba(255,255,255,0.06); border-radius: 6px; padding: 2px 7px; }
+
+  .recipe-section-title { font-size: 15px; font-weight: 800; margin: 0 0 4px; }
+  .recipe-section-desc { font-size: 13px; color: var(--text-dim); margin: 0 0 10px; line-height: 1.4; }
+
+  .recipe-card {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .recipe-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .recipe-card-head-text { display: flex; flex-direction: column; gap: 2px; }
+  .recipe-name { font-weight: 800; font-size: 14px; }
+  .recipe-meta { font-size: 12px; color: var(--text-dim); }
+  .donut-pic { width: 52px; height: 52px; object-fit: contain; flex-shrink: 0; }
+  .recipe-req { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .recipe-req .badge { color: #0e1620; }
+  .recipe-berries { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .berry-pill {
+    font-size: 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 5px 10px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .berry-pill-name { display: flex; align-items: center; }
+  .berry-pill-qty { color: var(--text-dim); font-weight: 700; white-space: nowrap; }
+  .berry-pill .berry-icon { width: 16px; height: 16px; margin-right: 5px; }
+
+  .combo-row {
+    padding: 8px 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .combo-row:first-of-type { border-top: none; }
+  .combo-berries { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .combo-result { font-size: 12px; font-weight: 700; color: var(--accent); margin-top: 6px; text-align: right; }
+
+  details.mech { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--panel-2); }
+  details.mech + details.mech { margin-top: 8px; }
+  details.mech summary { cursor: pointer; font-weight: 700; font-size: 14px; }
+  details.mech table { margin-top: 10px; }
+  details.mech p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+  .empty-msg { text-align: center; color: var(--text-faint); padding: 20px 0; font-size: 13px; }
+
+  .finder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; margin-bottom: 18px; }
+  .finder-berry-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 4px;
+    cursor: pointer;
+    font: inherit;
+    color: var(--text-dim);
+    font-size: 10px;
+    text-align: center;
+    line-height: 1.25;
+  }
+  .finder-berry-btn .berry-icon { width: 28px; height: 28px; margin-right: 0; }
+  .finder-berry-btn:hover { border-color: var(--accent); }
+  .finder-berry-btn.active { border-color: var(--accent); background: rgba(63, 166, 255, 0.15); color: var(--text); font-weight: 700; }
+
+  .finder-empty { text-align: center; color: var(--text-faint); padding: 20px 0; font-size: 13px; }
+  .finder-heading { font-size: 13px; font-weight: 800; color: var(--text-dim); margin: 14px 0 6px; }
+  .finder-heading:first-child { margin-top: 0; }
+
+  .berry-pill.matched { border-color: var(--accent); background: rgba(63, 166, 255, 0.18); color: var(--accent); font-weight: 800; }
+</style>
+
+<div class="wrap">
+  <div>
+    <h1>Ansha's Donuts</h1>
+    <p class="subtitle">Berry &amp; Flavor Power reference for Pok&eacute;mon Legends: Z-A.</p>
+  </div>
+
+  <div class="note">Donuts hold <b>3 Berries</b> at first, up to <b>8</b> once you get better butter. Each Berry's Sweet / Spicy / Sour / Bitter / Fresh points add up to decide the donut's dominant flavor(s); Level and Calories add up to set the star rating (Calories = time in Hyperspace Lumiose, Level = the level boost while there). <b>Berry table defaults to Hyper Berries</b> since that's what's used post-game.</p>
+
+  <div class="panel">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="finder" type="button">Recipe Finder</button>
+      <button class="tab-btn" data-tab="recipes" type="button">Recipes</button>
+      <button class="tab-btn" data-tab="berries" type="button">Berries</button>
+      <button class="tab-btn" data-tab="powers" type="button">Flavor Powers</button>
+      <button class="tab-btn" data-tab="mechanics" type="button">How It Works</button>
+    </div>
+
+    <div class="view" id="view-recipes">
+      <div class="subtabs">
+        <button class="subtab-btn active" data-subtab="special" type="button">Special Donuts</button>
+        <button class="subtab-btn" data-subtab="shiny" type="button">Shiny &amp; Alpha Hunting</button>
+        <button class="subtab-btn" data-subtab="item" type="button">Item Farming</button>
+        <button class="subtab-btn" data-subtab="berry" type="button">Hyper Berry Farming</button>
+        <button class="subtab-btn" data-subtab="lategame" type="button">Late Game Donuts</button>
+      </div>
+
+      <div class="subview active" id="subview-special">
+        <p class="recipe-section-desc">Story-locked recipes that open a portal to a Legendary encounter. Each can only be made once &mdash; the numbers below are <b>minimum</b> flavor totals, so hitting or exceeding all five is what matters.</p>
+        <div id="special-donuts"></div>
+      </div>
+
+      <div class="subview" id="subview-shiny">
+        <p class="recipe-section-desc" id="shiny-desc"></p>
+        <div class="recipe-card" id="shiny-combos"></div>
+      </div>
+
+      <div class="subview" id="subview-item">
+        <p class="recipe-section-desc" id="item-desc"></p>
+        <div class="recipe-card" id="item-combos"></div>
+      </div>
+
+      <div class="subview" id="subview-berry">
+        <p class="recipe-section-desc" id="berry-desc"></p>
+        <div class="recipe-card" id="berry-combos"></div>
+      </div>
+
+      <div class="subview" id="subview-lategame">
+        <p class="recipe-section-desc">As Portal Pok&eacute;mon levels climb, these push Level and Calories the highest for the longest, strongest runs in Hyperspace Lumiose. <b>Level/Calories totals are taken from the source as-is</b> &mdash; they run higher than a plain sum of the berry stats above, likely from an undocumented quality/star-rank bonus.</p>
+        <div id="lategame-donuts"></div>
+      </div>
+    </div>
+
+    <div class="view active" id="view-finder">
+      <p class="recipe-section-desc">Pick a Hyper Berry to see every recipe on the Recipes page that uses it.</p>
+      <div class="finder-grid" id="finder-berry-grid"></div>
+      <div id="finder-results"><div class="finder-empty">Select a berry above to see its recipes.</div></div>
+    </div>
+
+    <div class="view" id="view-berries">
+      <div class="controls">
+        <input class="search-input" id="berry-search" type="text" placeholder="Search berries&hellip;" />
+        <button class="toggle-btn" id="berry-tier-toggle" type="button">Show Base Berries</button>
+      </div>
+      <div class="table-scroll">
+        <table id="berry-table">
+          <thead>
+            <tr>
+              <th data-key="name">Berry</th>
+              <th data-key="sweet">Sweet</th>
+              <th data-key="spicy">Spicy</th>
+              <th data-key="sour">Sour</th>
+              <th data-key="bitter">Bitter</th>
+              <th data-key="fresh">Fresh</th>
+              <th data-key="level">Level</th>
+              <th data-key="cal">Cal.</th>
+              <th data-key="dom">Flavor</th>
+            </tr>
+          </thead>
+          <tbody id="berry-tbody"></tbody>
+        </table>
+        <div class="empty-msg" id="berry-empty" hidden>No berries match that search.</div>
+      </div>
+    </div>
+
+    <div class="view" id="view-powers">
+      <p class="subtitle" style="margin-bottom:12px">A donut's dominant flavor decides which Flavor Powers it can roll. Each power has 3 levels — higher Level Budget on that flavor means better odds of a higher level.</p>
+      <div class="flavor-groups" id="flavor-groups"></div>
+    </div>
+
+    <div class="view" id="view-mechanics">
+      <details class="mech" open>
+        <summary>Flavor Points &rarr; Budget Point (per flavor)</summary>
+        <p>Each flavor's total points on the donut set that flavor's own budget, used to decide how many/which Flavor Powers of that flavor get rolled. A Rainbow Donut adds +1 to every flavor's budget (never exceeding 9).</p>
+        <table id="table-flavor-budget"></table>
+      </details>
+      <details class="mech">
+        <summary>Level Budget &rarr; Power Roll Odds</summary>
+        <p>Once a flavor's budget is set, it rolls how many Flavor Powers of that flavor get added and at what cost (roughly: how many separate powers, and how high-level each is).</p>
+        <table id="table-level-odds"></table>
+      </details>
+      <details class="mech">
+        <summary>Total Flavors &rarr; Overall Budget Points</summary>
+        <p>All flavor points on the donut are summed and used to set the donut's overall budget point total.</p>
+        <table id="table-total-budget"></table>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+  // [name, sweet, spicy, sour, bitter, fresh, level, calories]
+  const BASE_BERRIES = [
+    ['Cheri',0,10,0,0,0,1,60],['Chesto',0,0,0,0,10,1,60],['Pecha',10,0,0,0,0,1,60],
+    ['Rawst',0,0,0,10,0,1,60],['Aspear',0,0,10,0,0,1,60],['Oran',0,5,5,5,5,1,60],
+    ['Persim',5,5,5,0,5,1,60],['Lum',5,5,0,5,5,2,65],['Sitrus',5,0,5,5,5,2,65],
+    ['Pomeg',10,10,0,10,0,2,65],['Kelpsy',0,0,10,10,10,2,65],['Qualot',10,10,10,0,0,2,65],
+    ['Hondew',0,10,0,10,10,2,65],['Grepa',10,0,10,0,10,2,65],['Tamato',0,15,0,0,10,2,65],
+    ['Occa',10,15,0,0,0,3,70],['Passho',0,0,0,10,15,3,70],['Wacan',15,0,10,0,0,3,70],
+    ['Rindo',0,10,0,15,0,3,70],['Yache',0,0,15,0,10,3,70],['Chople',0,15,0,10,0,3,70],
+    ['Kebia',0,0,10,0,15,3,70],['Shuca',15,10,0,0,0,3,70],['Coba',0,0,0,15,10,3,70],
+    ['Payapa',10,0,15,0,0,3,70],['Tanga',0,20,10,0,0,3,70],['Charti',0,10,0,0,20,3,70],
+    ['Kasib',20,0,0,0,10,3,70],['Haban',10,0,0,20,0,3,70],['Colbur',0,0,20,10,0,3,70],
+    ['Babiri',0,25,0,0,10,3,70],['Chilan',10,0,0,0,25,3,70],['Roseli',25,0,0,10,0,3,70],
+  ];
+
+  const HYPER_BERRIES = [
+    ['Hyper Cheri',0,40,0,0,0,5,80],['Hyper Chesto',0,0,0,0,40,3,100],['Hyper Pecha',40,0,0,0,0,2,100],
+    ['Hyper Rawst',0,0,0,40,0,3,110],['Hyper Aspear',0,0,40,0,0,4,90],['Hyper Oran',10,20,15,15,0,6,90],
+    ['Hyper Persim',0,15,15,10,20,4,110],['Hyper Lum',20,15,10,0,15,3,110],['Hyper Sitrus',15,10,0,20,15,4,120],
+    ['Hyper Pomeg',30,35,0,0,5,7,140],['Hyper Kelpsy',5,0,0,30,35,5,160],['Hyper Qualot',35,0,30,5,0,4,160],
+    ['Hyper Hondew',0,5,35,0,30,6,150],['Hyper Grepa',0,60,25,0,5,8,140],['Hyper Tamato',5,25,0,0,60,6,180],
+    ['Hyper Occa',60,0,0,5,25,5,180],['Hyper Passho',25,0,5,60,0,6,200],['Hyper Wacan',0,5,60,25,0,7,160],
+    ['Hyper Rindo',15,55,0,5,25,9,210],['Hyper Yache',25,0,5,15,55,7,250],['Hyper Chople',55,5,15,25,0,6,250],
+    ['Hyper Kebia',0,15,25,55,5,7,270],['Hyper Shuca',5,25,55,0,15,8,230],['Hyper Coba',10,95,0,10,5,10,240],
+    ['Hyper Payapa',5,0,10,10,95,8,300],['Hyper Tanga',95,10,10,5,0,7,300],['Hyper Charti',0,10,5,95,10,8,330],
+    ['Hyper Kasib',10,5,95,0,10,9,270],['Hyper Haban',85,0,0,0,65,8,370],['Hyper Colbur',0,0,65,0,85,9,370],
+    ['Hyper Babiri',0,0,65,85,0,9,400],['Hyper Chilan',0,85,0,65,0,9,370],['Hyper Roseli',0,65,85,0,0,10,340],
+  ];
+
+  const FLAVORS = ['sweet', 'spicy', 'sour', 'bitter', 'fresh'];
+  const FLAVOR_LABEL = { sweet: 'Sweet', spicy: 'Spicy', sour: 'Sour', bitter: 'Bitter', fresh: 'Fresh' };
+
+  // --- Recipes (verified against the Hyper Berry stats above: every
+  // combo's flavor totals were re-summed and checked to meet/exceed the
+  // listed requirement before inclusion) ---
+  const SPECIAL_DONUTS = [
+    {
+      name: 'Bad Dreams Cruller', target: 'Mega Darkrai', mission: 'Hyperspace Mission 11',
+      need: { sweet: 310, spicy: 100, sour: 310, bitter: 40, fresh: 40 },
+      berries: [['Hyper Tanga', 3], ['Hyper Kasib', 3], ['Hyper Coba', 1], ['Hyper Yache', 1]],
+    },
+    {
+      name: 'Delta Old Fashioned Donut', target: 'Mega Rayquaza', mission: 'Hyperspace Mission 12',
+      need: { sweet: 120, spicy: 40, sour: 340, bitter: 40, fresh: 390 },
+      berries: [['Hyper Oran', 1], ['Hyper Yache', 1], ['Hyper Payapa', 1], ['Hyper Kasib', 1], ['Hyper Haban', 1], ['Hyper Colbur', 2], ['Hyper Roseli', 1]],
+    },
+    {
+      name: 'Omega Old Fashioned Donut', target: 'Primal Groudon', mission: 'Hyperspace Mission 13',
+      need: { sweet: 260, spicy: 160, sour: 160, bitter: 20, fresh: 260 },
+      berries: [['Hyper Haban', 2], ['Hyper Tamato', 1], ['Hyper Tanga', 1], ['Hyper Colbur', 1], ['Hyper Chilan', 1], ['Hyper Roseli', 1]],
+    },
+    {
+      name: 'Alpha Old Fashioned Donut', target: 'Primal Kyogre', mission: 'Hyperspace Mission 14',
+      need: { sweet: 50, spicy: 50, sour: 210, bitter: 180, fresh: 370 },
+      berries: [['Hyper Payapa', 2], ['Hyper Kelpsy', 1], ['Hyper Yache', 1], ['Hyper Kebia', 1], ['Hyper Kasib', 1], ['Hyper Colbur', 1], ['Hyper Chilan', 1]],
+    },
+    {
+      name: 'Plasma-Glazed Donut', target: 'Mega Zeraora', mission: 'Side Mission EX3',
+      need: { sweet: 40, spicy: 200, sour: 400, bitter: 280, fresh: 40 },
+      berries: [['Hyper Kebia', 1], ['Hyper Charti', 1], ['Hyper Kasib', 4], ['Hyper Chilan', 2]],
+    },
+  ];
+
+  const FARMING_DONUTS = [
+    {
+      id: 'shiny',
+      group: 'Shiny & Alpha Hunting',
+      desc: 'High Sweet rolls Sparkling Power (Shiny) and Alpha Power; adding Fresh can also roll Encounter Power.',
+      combos: [
+        { berries: [['Hyper Haban', 8]], result: 'Sweet 680 &middot; Fresh 520' },
+        { berries: [['Hyper Tanga', 4], ['Hyper Haban', 4]], result: 'Sweet 720 &middot; Fresh 260' },
+        { berries: [['Hyper Haban', 3], ['Hyper Occa', 3], ['Hyper Tanga', 2]], result: 'Sweet 625 &middot; Fresh 270' },
+      ],
+    },
+    {
+      id: 'item',
+      group: 'Item Farming',
+      desc: 'High Sour rolls Big Haul Power and Item Power (pick the specific Item Power on reroll if it doesn’t land first try).',
+      combos: [
+        { berries: [['Hyper Kasib', 8]], result: 'Sour 760' },
+        { berries: [['Hyper Kasib', 4], ['Hyper Roseli', 4]], result: 'Sour 720' },
+        { berries: [['Hyper Kasib', 4], ['Hyper Colbur', 2], ['Hyper Babiri', 2]], result: 'Sour 640' },
+        { berries: [['Hyper Wacan', 6], ['Hyper Hondew', 1], ['Hyper Grepa', 1]], result: 'Sour 420' },
+        { berries: [['Hyper Kasib', 3], ['Hyper Colbur', 2], ['Hyper Chilan', 2]], result: 'Sour 415' },
+        { berries: [['Hyper Roseli', 2], ['Hyper Payapa', 1], ['Hyper Kasib', 1], ['Hyper Colbur', 3]], result: 'Sour 470' },
+      ],
+    },
+    {
+      id: 'berry',
+      group: 'Hyper Berry Farming',
+      desc: 'Dump 8 of a single Sour berry to farm Item Power: Berries; reroll if the bonus doesn’t land. Sorted best Sour total first.',
+      combos: [
+        { berries: [['Hyper Kasib', 8]], result: 'Sour 760' },
+        { berries: [['Hyper Roseli', 8]], result: 'Sour 680' },
+        { berries: [['Hyper Colbur', 8]], result: 'Sour 520' },
+        { berries: [['Hyper Babiri', 8]], result: 'Sour 520' },
+        { berries: [['Hyper Tanga', 8]], result: 'Sour 80' },
+        { berries: [['Hyper Payapa', 8]], result: 'Sour 80' },
+      ],
+    },
+  ];
+
+  // "Late Game" combos are copied as Game8 reports them (Level/Calories
+  // here run higher than a plain per-berry sum of the stats above - the
+  // game apparently applies some further quality/star-rank bonus on top
+  // that isn't documented anywhere, so these two columns are taken on
+  // faith from the source rather than independently derived).
+  const LATE_GAME_DONUTS = [
+    { berries: [['Hyper Coba', 4], ['Hyper Charti', 4]], level: '+108', cal: '3420' },
+    { berries: [['Hyper Oran', 2], ['Hyper Coba', 1], ['Hyper Charti', 1], ['Hyper Chilan', 4]], level: '+99', cal: '3345' },
+    { berries: [['Hyper Chilan', 6], ['Kelpsy', 2]], level: '+87', cal: '3525' },
+    { berries: [['Hyper Rindo', 3], ['Hyper Kebia', 3], ['Hyper Oran', 2]], level: '+84', cal: '2268' },
+  ];
+
+  function berrySlug(name) {
+    return name.toLowerCase().replace(/\s+/g, '') + 'berry';
+  }
+  function berryIcon(name) {
+    return `<img class="berry-icon" src="icons/berries/${berrySlug(name)}.png" alt="" loading="lazy" />`;
+  }
+
+  const DONUT_IMAGE_SLUGS = {
+    'Bad Dreams Cruller': 'bad-dreams-cruller',
+    'Delta Old Fashioned Donut': 'delta-old-fashioned-donut',
+    'Omega Old Fashioned Donut': 'omega-old-fashioned-donut',
+    'Alpha Old Fashioned Donut': 'alpha-old-fashioned-donut',
+    'Plasma-Glazed Donut': 'plasma-glazed-donut',
+  };
+  function donutImage(name) {
+    const slug = DONUT_IMAGE_SLUGS[name];
+    return slug ? `<img class="donut-pic" src="icons/donuts/${slug}.png" alt="${name}" loading="lazy" />` : '';
+  }
+
+  function toBerryObjs(rows) {
+    return rows.map(r => {
+      const [name, sweet, spicy, sour, bitter, fresh, level, cal] = r;
+      const vals = { sweet, spicy, sour, bitter, fresh };
+      const max = Math.max(sweet, spicy, sour, bitter, fresh);
+      const dom = max === 0 ? [] : FLAVORS.filter(f => vals[f] === max);
+      return { name, sweet, spicy, sour, bitter, fresh, level, cal, dom };
+    });
+  }
+
+  const baseBerries = toBerryObjs(BASE_BERRIES);
+  const hyperBerries = toBerryObjs(HYPER_BERRIES);
+
+  let showingHyper = true;
+  let berrySort = { key: 'name', dir: 1 };
+  let berryQuery = '';
+
+  const berryTbody = document.getElementById('berry-tbody');
+  const berryEmpty = document.getElementById('berry-empty');
+  const berryTierToggle = document.getElementById('berry-tier-toggle');
+  const berrySearch = document.getElementById('berry-search');
+
+  function renderBerryTable() {
+    const source = showingHyper ? hyperBerries : baseBerries;
+    const q = berryQuery.trim().toLowerCase();
+    let rows = source.filter(b => b.name.toLowerCase().includes(q));
+
+    const key = berrySort.key;
+    rows = rows.slice().sort((a, b) => {
+      let av = key === 'dom' ? a.dom.join(',') : (key === 'cal' ? a.cal : a[key]);
+      let bv = key === 'dom' ? b.dom.join(',') : (key === 'cal' ? b.cal : b[key]);
+      if (typeof av === 'string') return av.localeCompare(bv) * berrySort.dir;
+      return (av - bv) * berrySort.dir;
+    });
+
+    berryTbody.innerHTML = '';
+    rows.forEach(b => {
+      const tr = document.createElement('tr');
+      const cell = (f) => `<td class="flavor-cell${b.dom.includes(f) ? ' hi' : ''}">${b[f]}</td>`;
+      tr.innerHTML = `
+        <td class="name">${berryIcon(b.name)}${b.name}</td>
+        ${FLAVORS.map(cell).join('')}
+        <td>+${b.level}</td>
+        <td>${b.cal}</td>
+        <td>${b.dom.map(f => `<span class="badge ${f}">${FLAVOR_LABEL[f]}</span>`).join(' ')}</td>
+      `;
+      berryTbody.appendChild(tr);
+    });
+
+    berryEmpty.hidden = rows.length > 0;
+
+    document.querySelectorAll('#berry-table thead th').forEach(th => {
+      th.classList.toggle('sorted', th.dataset.key === berrySort.key);
+    });
+  }
+
+  document.querySelectorAll('#berry-table thead th').forEach(th => {
+    th.addEventListener('click', () => {
+      if (berrySort.key === th.dataset.key) berrySort.dir *= -1;
+      else berrySort = { key: th.dataset.key, dir: 1 };
+      renderBerryTable();
+    });
+  });
+
+  berryTierToggle.addEventListener('click', () => {
+    showingHyper = !showingHyper;
+    berryTierToggle.textContent = showingHyper ? 'Show Base Berries' : 'Show Hyper Berries';
+    renderBerryTable();
+  });
+
+  berrySearch.addEventListener('input', () => {
+    berryQuery = berrySearch.value;
+    renderBerryTable();
+  });
+
+  renderBerryTable();
+
+  // --- Flavor Powers ---
+  const POWERS = {
+    sweet: [
+      ['Alpha Power', 'Better odds of finding Alpha Pokémon'],
+      ['Sparkling Power', 'Better odds of finding Shiny Pokémon'],
+      ['Humungo Power', 'Better odds of finding oversized Pokémon'],
+      ['Teensy Power', 'Better odds of finding undersized Pokémon'],
+    ],
+    spicy: [
+      ['Attack Power', "Boosts your Pokémon's Attack"],
+      ['Sp. Atk Power', "Boosts your Pokémon's Sp. Atk"],
+      ['Move Power', 'Boosts the power of a single move type'],
+      ['Speed Power', "Boosts your Pokémon's Speed"],
+    ],
+    sour: [
+      ['Item Power: Berries', 'More likely to find Berries'],
+      ['Item Power: Candies', 'More likely to get Exp. Candies'],
+      ['Item Power: Treasure', 'More likely to find treasure'],
+      ['Item Power: Poké Balls', 'More likely to find Poké Balls'],
+      ['Item Power: Special', 'More likely to get special items'],
+      ['Item Power: Coins', 'More likely to find coins'],
+      ['Mega Power Charging', 'Gain Mega Power faster'],
+      ['Mega Power Conservation', 'Mega Evolution lasts longer'],
+      ['Big Haul Power', 'Get more items per pickup'],
+    ],
+    bitter: [
+      ['Defense Power', "Boosts your Pokémon's Defense"],
+      ['Sp. Def Power', "Boosts your Pokémon's Sp. Def"],
+      ['Resistance Power', 'Reduces damage taken from a single move type'],
+    ],
+    fresh: [
+      ['Encounter Power', 'More wild Pokémon appear'],
+      ['Catching Power', 'Easier to catch all types of Pokémon'],
+    ],
+  };
+  const LEVEL_TAG = ['Lv.1 &middot; small', 'Lv.2 &middot; medium', 'Lv.3 &middot; large'];
+
+  const flavorGroupsEl = document.getElementById('flavor-groups');
+  FLAVORS.forEach(f => {
+    const group = document.createElement('div');
+    group.className = `flavor-group ${f}`;
+    const rows = POWERS[f].map(([name, desc]) => `
+      <div class="power-row">
+        <div class="power-name">${name}</div>
+        <div class="power-levels">${LEVEL_TAG.map(t => `<span>${t}</span>`).join('')}</div>
+        <div class="power-levels" style="margin-top:3px">${desc}</div>
+      </div>
+    `).join('');
+    group.innerHTML = `<div class="flavor-group-title">${FLAVOR_LABEL[f]}</div>${rows}`;
+    flavorGroupsEl.appendChild(group);
+  });
+
+  // --- Recipes ---
+  function berryPills(berries, highlightName) {
+    return berries.map(([name, qty]) => `
+      <span class="berry-pill${name === highlightName ? ' matched' : ''}">
+        <span class="berry-pill-name">${berryIcon(name)}${name}</span>
+        <span class="berry-pill-qty">&times;${qty}</span>
+      </span>
+    `).join('');
+  }
+
+  const specialDonutsEl = document.getElementById('special-donuts');
+  SPECIAL_DONUTS.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    const reqBadges = FLAVORS.map(f => `<span class="badge ${f}">${FLAVOR_LABEL[f]} ${d.need[f]}+</span>`).join('');
+    card.innerHTML = `
+      <div class="recipe-card-head">
+        ${donutImage(d.name)}
+        <div class="recipe-card-head-text">
+          <span class="recipe-name">${d.name}</span>
+          <span class="recipe-meta">${d.target} &middot; ${d.mission}</span>
+        </div>
+      </div>
+      <div class="recipe-req">${reqBadges}</div>
+      <div class="recipe-berries">${berryPills(d.berries)}</div>
+    `;
+    specialDonutsEl.appendChild(card);
+  });
+
+  FARMING_DONUTS.forEach(section => {
+    document.getElementById(`${section.id}-desc`).innerHTML = section.desc;
+    document.getElementById(`${section.id}-combos`).innerHTML = section.combos.map(c => `
+      <div class="combo-row">
+        <div class="combo-berries">${berryPills(c.berries)}</div>
+        <div class="combo-result">${c.result}</div>
+      </div>
+    `).join('');
+  });
+
+  const lategameDonutsEl = document.getElementById('lategame-donuts');
+  const lategameCard = document.createElement('div');
+  lategameCard.className = 'recipe-card';
+  lategameCard.innerHTML = LATE_GAME_DONUTS.map(c => `
+    <div class="combo-row">
+      <div class="combo-berries">${berryPills(c.berries)}</div>
+      <div class="combo-result">Level ${c.level} &middot; Cal. ${c.cal}</div>
+    </div>
+  `).join('');
+  lategameDonutsEl.appendChild(lategameCard);
+
+  // --- Recipe Finder: build an index of every recipe on the Recipes
+  // page, keyed by which Hyper Berries it uses, so clicking a berry can
+  // list back every recipe containing it. ---
+  const RECIPE_INDEX = [];
+  SPECIAL_DONUTS.forEach(d => {
+    RECIPE_INDEX.push({ type: 'special', category: 'Special Donuts', donut: d });
+  });
+  FARMING_DONUTS.forEach(section => {
+    section.combos.forEach(c => {
+      RECIPE_INDEX.push({ type: 'combo', category: section.group, combo: c });
+    });
+  });
+  LATE_GAME_DONUTS.forEach(c => {
+    RECIPE_INDEX.push({ type: 'lategame', category: 'Late Game Donuts', combo: c });
+  });
+
+  function entryBerries(entry) {
+    return entry.type === 'special' ? entry.donut.berries : entry.combo.berries;
+  }
+
+  const berryToEntries = new Map();
+  RECIPE_INDEX.forEach(entry => {
+    entryBerries(entry).forEach(([name]) => {
+      if (!berryToEntries.has(name)) berryToEntries.set(name, []);
+      berryToEntries.get(name).push(entry);
+    });
+  });
+
+  // Only Hyper Berries that actually appear in a recipe (e.g. plain
+  // "Kelpsy" in the Late Game list is excluded - it isn't a Hyper Berry).
+  const FINDER_BERRIES = Array.from(berryToEntries.keys())
+    .filter(name => name.startsWith('Hyper '))
+    .sort();
+
+  const finderGridEl = document.getElementById('finder-berry-grid');
+  const finderResultsEl = document.getElementById('finder-results');
+
+  FINDER_BERRIES.forEach(name => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'finder-berry-btn';
+    btn.dataset.berry = name;
+    btn.innerHTML = `${berryIcon(name)}<span>${name.replace('Hyper ', '')}</span>`;
+    btn.addEventListener('click', () => selectFinderBerry(name));
+    finderGridEl.appendChild(btn);
+  });
+
+  function renderFinderEntry(entry, berryName) {
+    if (entry.type === 'special') {
+      const d = entry.donut;
+      const reqBadges = FLAVORS.map(f => `<span class="badge ${f}">${FLAVOR_LABEL[f]} ${d.need[f]}+</span>`).join('');
+      return `
+        <div class="recipe-card">
+          <div class="recipe-card-head">
+            ${donutImage(d.name)}
+            <div class="recipe-card-head-text">
+              <span class="recipe-name">${d.name}</span>
+              <span class="recipe-meta">${d.target} &middot; ${d.mission}</span>
+            </div>
+          </div>
+          <div class="recipe-req">${reqBadges}</div>
+          <div class="recipe-berries">${berryPills(d.berries, berryName)}</div>
+        </div>
+      `;
+    }
+    const c = entry.combo;
+    const result = entry.type === 'lategame' ? `Level ${c.level} &middot; Cal. ${c.cal}` : c.result;
+    return `
+      <div class="recipe-card">
+        <div class="recipe-berries">${berryPills(c.berries, berryName)}</div>
+        <div class="combo-result" style="margin-top:8px">${result}</div>
+      </div>
+    `;
+  }
+
+  function selectFinderBerry(name) {
+    document.querySelectorAll('.finder-berry-btn').forEach(b => b.classList.toggle('active', b.dataset.berry === name));
+
+    const entries = berryToEntries.get(name) || [];
+    if (entries.length === 0) {
+      finderResultsEl.innerHTML = '<div class="finder-empty">No recipes use this berry.</div>';
+      return;
+    }
+
+    const byCategory = new Map();
+    entries.forEach(entry => {
+      if (!byCategory.has(entry.category)) byCategory.set(entry.category, []);
+      byCategory.get(entry.category).push(entry);
+    });
+
+    let html = '';
+    byCategory.forEach((list, category) => {
+      html += `<div class="finder-heading">${category} (${list.length})</div>`;
+      html += list.map(entry => renderFinderEntry(entry, name)).join('');
+    });
+    finderResultsEl.innerHTML = html;
+  }
+
+  // --- Mechanics tables ---
+  function buildTable(el, headers, rows) {
+    el.innerHTML = `
+      <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+    `;
+  }
+
+  buildTable(document.getElementById('table-flavor-budget'), ['Flavor Points', 'Budget Point'], [
+    [120, 1], [160, 2], [200, 3], [300, 4], [360, 5], [420, 6], [525, 7], [700, 8], [760, 9],
+  ]);
+
+  buildTable(document.getElementById('table-level-odds'), ['Level Budget', 'Cost 1', 'Cost 2', 'Cost 3'], [
+    [1, '&mdash;', '&mdash;', '&mdash;'],
+    [2, '100%', '&mdash;', '&mdash;'],
+    [3, '50%', '50%', '&mdash;'],
+    [4, '25%', '75%', '&mdash;'],
+    [5, '19.05%', '42.86%', '38.10%'],
+    [6, '14.29%', '28.57%', '57.14%'],
+    [7, '9.52%', '33.33%', '57.14%'],
+    [8, '&mdash;', '33.33%', '66.67%'],
+    [9, '&mdash;', '&mdash;', '100%'],
+  ]);
+
+  buildTable(document.getElementById('table-total-budget'), ['Total Flavors', 'Budget Points'], [
+    [120, 1], [240, 2], [350, 3], [420, 4], [500, 5], [600, 6], [700, 7], [800, 8], [900, 9],
+  ]);
+
+  // --- Tabs ---
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(`view-${btn.dataset.tab}`).classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.subtab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.subtab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.subview').forEach(v => v.classList.remove('active'));
+      document.getElementById(`subview-${btn.dataset.subtab}`).classList.add('active');
+    });
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register('sw.js', { updateViaCache: 'none' })
+        .then(reg => reg.update())
+        .catch(() => {});
+    });
+
+    let refreshedOnce = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshedOnce) return;
+      refreshedOnce = true;
+      window.location.reload();
+    });
+  }
+</script>

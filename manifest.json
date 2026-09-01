@@ -1,0 +1,25 @@
+{
+  "name": "Ansha's Donuts",
+  "short_name": "Ansha's Donuts",
+  "description": "Berry stats, Flavor Powers, and donut recipes for Pokémon Legends: Z-A.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1620",
+  "theme_color": "#0e1620",
+  "icons": [
+    {
+      "src": "icons/favicon.png",
+      "sizes": "480x480",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/favicon.png",
+      "sizes": "480x480",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
