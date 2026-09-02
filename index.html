@@ -86,19 +86,18 @@
   .view { display: none; }
   .view.active { display: block; }
 
-  .subtabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 2px; }
+  .subtabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
   .subtab-btn {
-    flex-shrink: 0;
     font: inherit;
     font-weight: 700;
     font-size: 12px;
     color: var(--text-dim);
     background: var(--panel-2);
     border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 7px 12px;
+    border-radius: 10px;
+    padding: 7px 8px;
     cursor: pointer;
-    white-space: nowrap;
+    line-height: 1.25;
   }
   .subtab-btn.active { color: var(--bg); background: var(--accent); border-color: var(--accent); }
 
@@ -175,10 +174,12 @@
 
   .flavor-groups { display: flex; flex-direction: column; gap: 10px; }
   .flavor-group {
+    display: none;
     border-radius: 12px;
     padding: 12px 14px;
     border: 1px solid var(--line);
   }
+  .flavor-group.active { display: block; }
   .flavor-group.sweet { background: #2a1e28; border-color: rgba(255, 111, 176, 0.4); }
   .flavor-group.spicy { background: #2a1f18; border-color: rgba(255, 122, 77, 0.4); }
   .flavor-group.sour { background: #212a18; border-color: rgba(198, 224, 74, 0.35); }
@@ -239,12 +240,6 @@
   .combo-berries { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
   .combo-result { font-size: 12px; font-weight: 700; color: var(--accent); margin-top: 6px; text-align: right; }
 
-  details.mech { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--panel-2); }
-  details.mech + details.mech { margin-top: 8px; }
-  details.mech summary { cursor: pointer; font-weight: 700; font-size: 14px; }
-  details.mech table { margin-top: 10px; }
-  details.mech p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
-
   .empty-msg { text-align: center; color: var(--text-faint); padding: 20px 0; font-size: 13px; }
 
   .finder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; margin-bottom: 18px; }
@@ -289,26 +284,25 @@
       <button class="tab-btn" data-tab="recipes" type="button">Recipes</button>
       <button class="tab-btn" data-tab="berries" type="button">Berries</button>
       <button class="tab-btn" data-tab="powers" type="button">Flavor Powers</button>
-      <button class="tab-btn" data-tab="mechanics" type="button">How It Works</button>
     </div>
 
     <div class="view" id="view-recipes">
       <div class="subtabs">
-        <button class="subtab-btn active" data-subtab="special" type="button">Special Donuts</button>
-        <button class="subtab-btn" data-subtab="shiny" type="button">Shiny &amp; Alpha Hunting</button>
+        <button class="subtab-btn active" data-subtab="shiny" type="button">Shiny &amp; Alpha Hunting</button>
         <button class="subtab-btn" data-subtab="item" type="button">Item Farming</button>
         <button class="subtab-btn" data-subtab="berry" type="button">Hyper Berry Farming</button>
         <button class="subtab-btn" data-subtab="lategame" type="button">Late Game Donuts</button>
+        <button class="subtab-btn" data-subtab="special" type="button">Special Donuts</button>
       </div>
 
-      <div class="subview active" id="subview-special">
-        <p class="recipe-section-desc">Story-locked recipes that open a portal to a Legendary encounter. Each can only be made once &mdash; the numbers below are <b>minimum</b> flavor totals, so hitting or exceeding all five is what matters.</p>
-        <div id="special-donuts"></div>
-      </div>
-
-      <div class="subview" id="subview-shiny">
+      <div class="subview active" id="subview-shiny">
         <p class="recipe-section-desc" id="shiny-desc"></p>
         <div class="recipe-card" id="shiny-combos"></div>
+      </div>
+
+      <div class="subview" id="subview-special">
+        <p class="recipe-section-desc">Story-locked recipes that open a portal to a Legendary encounter. Each can only be made once &mdash; the numbers below are <b>minimum</b> flavor totals, so hitting or exceeding all five is what matters.</p>
+        <div id="special-donuts"></div>
       </div>
 
       <div class="subview" id="subview-item">
@@ -361,25 +355,8 @@
 
     <div class="view" id="view-powers">
       <p class="subtitle" style="margin-bottom:12px">A donut's dominant flavor decides which Flavor Powers it can roll. Each power has 3 levels — higher Level Budget on that flavor means better odds of a higher level.</p>
+      <div class="subtabs" id="power-flavor-tabs"></div>
       <div class="flavor-groups" id="flavor-groups"></div>
-    </div>
-
-    <div class="view" id="view-mechanics">
-      <details class="mech" open>
-        <summary>Flavor Points &rarr; Budget Point (per flavor)</summary>
-        <p>Each flavor's total points on the donut set that flavor's own budget, used to decide how many/which Flavor Powers of that flavor get rolled. A Rainbow Donut adds +1 to every flavor's budget (never exceeding 9).</p>
-        <table id="table-flavor-budget"></table>
-      </details>
-      <details class="mech">
-        <summary>Level Budget &rarr; Power Roll Odds</summary>
-        <p>Once a flavor's budget is set, it rolls how many Flavor Powers of that flavor get added and at what cost (roughly: how many separate powers, and how high-level each is).</p>
-        <table id="table-level-odds"></table>
-      </details>
-      <details class="mech">
-        <summary>Total Flavors &rarr; Overall Budget Points</summary>
-        <p>All flavor points on the donut are summed and used to set the donut's overall budget point total.</p>
-        <table id="table-total-budget"></table>
-      </details>
     </div>
   </div>
 </div>
@@ -633,9 +610,12 @@
   const LEVEL_TAG = ['Lv.1 &middot; small', 'Lv.2 &middot; medium', 'Lv.3 &middot; large'];
 
   const flavorGroupsEl = document.getElementById('flavor-groups');
+  const powerFlavorTabsEl = document.getElementById('power-flavor-tabs');
   FLAVORS.forEach(f => {
+    const isDefault = f === 'sweet';
+
     const group = document.createElement('div');
-    group.className = `flavor-group ${f}`;
+    group.className = `flavor-group ${f}${isDefault ? ' active' : ''}`;
     const rows = POWERS[f].map(([name, desc]) => `
       <div class="power-row">
         <div class="power-name">${name}</div>
@@ -645,6 +625,17 @@
     `).join('');
     group.innerHTML = `<div class="flavor-group-title">${FLAVOR_LABEL[f]}</div>${rows}`;
     flavorGroupsEl.appendChild(group);
+
+    const tabBtn = document.createElement('button');
+    tabBtn.type = 'button';
+    tabBtn.className = `subtab-btn${isDefault ? ' active' : ''}`;
+    tabBtn.dataset.flavor = f;
+    tabBtn.textContent = FLAVOR_LABEL[f];
+    tabBtn.addEventListener('click', () => {
+      powerFlavorTabsEl.querySelectorAll('.subtab-btn').forEach(b => b.classList.toggle('active', b === tabBtn));
+      flavorGroupsEl.querySelectorAll('.flavor-group').forEach(g => g.classList.toggle('active', g === group));
+    });
+    powerFlavorTabsEl.appendChild(tabBtn);
   });
 
   // --- Recipes ---
@@ -794,34 +785,6 @@
     });
     finderResultsEl.innerHTML = html;
   }
-
-  // --- Mechanics tables ---
-  function buildTable(el, headers, rows) {
-    el.innerHTML = `
-      <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-      <tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
-    `;
-  }
-
-  buildTable(document.getElementById('table-flavor-budget'), ['Flavor Points', 'Budget Point'], [
-    [120, 1], [160, 2], [200, 3], [300, 4], [360, 5], [420, 6], [525, 7], [700, 8], [760, 9],
-  ]);
-
-  buildTable(document.getElementById('table-level-odds'), ['Level Budget', 'Cost 1', 'Cost 2', 'Cost 3'], [
-    [1, '&mdash;', '&mdash;', '&mdash;'],
-    [2, '100%', '&mdash;', '&mdash;'],
-    [3, '50%', '50%', '&mdash;'],
-    [4, '25%', '75%', '&mdash;'],
-    [5, '19.05%', '42.86%', '38.10%'],
-    [6, '14.29%', '28.57%', '57.14%'],
-    [7, '9.52%', '33.33%', '57.14%'],
-    [8, '&mdash;', '33.33%', '66.67%'],
-    [9, '&mdash;', '&mdash;', '100%'],
-  ]);
-
-  buildTable(document.getElementById('table-total-budget'), ['Total Flavors', 'Budget Points'], [
-    [120, 1], [240, 2], [350, 3], [420, 4], [500, 5], [600, 6], [700, 7], [800, 8], [900, 9],
-  ]);
 
   // --- Tabs ---
   document.querySelectorAll('.tab-btn').forEach(btn => {

@@ -1,4 +1,4 @@
-const CACHE = 'ansha-donuts-v1';
+const CACHE = 'ansha-donuts-v2';
 const ASSETS = [
   './',
   './index.html',
