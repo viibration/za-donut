@@ -485,12 +485,12 @@
   }
 
   function toBerryObjs(rows) {
-    return rows.map(r => {
+    return rows.map((r, idx) => {
       const [name, sweet, spicy, sour, bitter, fresh, level, cal] = r;
       const vals = { sweet, spicy, sour, bitter, fresh };
       const max = Math.max(sweet, spicy, sour, bitter, fresh);
       const dom = max === 0 ? [] : FLAVORS.filter(f => vals[f] === max);
-      return { name, sweet, spicy, sour, bitter, fresh, level, cal, dom };
+      return { name, sweet, spicy, sour, bitter, fresh, level, cal, dom, idx };
     });
   }
 
@@ -498,7 +498,7 @@
   const hyperBerries = toBerryObjs(HYPER_BERRIES);
 
   let showingHyper = true;
-  let berrySort = { key: 'name', dir: 1 };
+  let berrySort = { key: 'idx', dir: 1 };
   let berryQuery = '';
 
   const berryTbody = document.getElementById('berry-tbody');
@@ -707,9 +707,10 @@
 
   // Only Hyper Berries that actually appear in a recipe (e.g. plain
   // "Kelpsy" in the Late Game list is excluded - it isn't a Hyper Berry).
+  const hyperBerryOrder = new Map(hyperBerries.map(b => [b.name, b.idx]));
   const FINDER_BERRIES = Array.from(berryToEntries.keys())
     .filter(name => name.startsWith('Hyper '))
-    .sort();
+    .sort((a, b) => hyperBerryOrder.get(a) - hyperBerryOrder.get(b));
 
   const finderGridEl = document.getElementById('finder-berry-grid');
   const finderResultsEl = document.getElementById('finder-results');
