@@ -259,6 +259,7 @@
     text-align: center;
     line-height: 1.25;
   }
+  .finder-berry-btn[hidden] { display: none; }
   .finder-berry-btn .berry-icon { width: 28px; height: 28px; margin-right: 0; }
   .finder-berry-btn:hover { border-color: var(--accent); }
   .finder-berry-btn.active { border-color: var(--accent); background: rgba(63, 166, 255, 0.15); color: var(--text); font-weight: 700; }
@@ -323,6 +324,9 @@
 
     <div class="view active" id="view-finder">
       <p class="recipe-section-desc">Pick a Hyper Berry to see every recipe on the Recipes page that uses it.</p>
+      <div class="controls">
+        <input class="search-input" id="finder-berry-search" type="text" placeholder="Search berries&hellip;" />
+      </div>
       <div class="finder-grid" id="finder-berry-grid"></div>
       <div id="finder-results"><div class="finder-empty">Select a berry above to see its recipes.</div></div>
     </div>
@@ -399,24 +403,9 @@
   // listed requirement before inclusion) ---
   const SPECIAL_DONUTS = [
     {
-      name: 'Bad Dreams Cruller', target: 'Mega Darkrai', mission: 'Hyperspace Mission 11',
-      need: { sweet: 310, spicy: 100, sour: 310, bitter: 40, fresh: 40 },
-      berries: [['Hyper Tanga', 3], ['Hyper Kasib', 3], ['Hyper Coba', 1], ['Hyper Yache', 1]],
-    },
-    {
       name: 'Delta Old Fashioned Donut', target: 'Mega Rayquaza', mission: 'Hyperspace Mission 12',
       need: { sweet: 120, spicy: 40, sour: 340, bitter: 40, fresh: 390 },
       berries: [['Hyper Oran', 1], ['Hyper Yache', 1], ['Hyper Payapa', 1], ['Hyper Kasib', 1], ['Hyper Haban', 1], ['Hyper Colbur', 2], ['Hyper Roseli', 1]],
-    },
-    {
-      name: 'Omega Old Fashioned Donut', target: 'Primal Groudon', mission: 'Hyperspace Mission 13',
-      need: { sweet: 260, spicy: 160, sour: 160, bitter: 20, fresh: 260 },
-      berries: [['Hyper Haban', 2], ['Hyper Tamato', 1], ['Hyper Tanga', 1], ['Hyper Colbur', 1], ['Hyper Chilan', 1], ['Hyper Roseli', 1]],
-    },
-    {
-      name: 'Alpha Old Fashioned Donut', target: 'Primal Kyogre', mission: 'Hyperspace Mission 14',
-      need: { sweet: 50, spicy: 50, sour: 210, bitter: 180, fresh: 370 },
-      berries: [['Hyper Payapa', 2], ['Hyper Kelpsy', 1], ['Hyper Yache', 1], ['Hyper Kebia', 1], ['Hyper Kasib', 1], ['Hyper Colbur', 1], ['Hyper Chilan', 1]],
     },
     {
       name: 'Plasma-Glazed Donut', target: 'Mega Zeraora', mission: 'Side Mission EX3',
@@ -724,6 +713,7 @@
 
   const finderGridEl = document.getElementById('finder-berry-grid');
   const finderResultsEl = document.getElementById('finder-results');
+  const finderBerrySearch = document.getElementById('finder-berry-search');
 
   FINDER_BERRIES.forEach(name => {
     const btn = document.createElement('button');
@@ -733,6 +723,13 @@
     btn.innerHTML = `${berryIcon(name)}<span>${name.replace('Hyper ', '')}</span>`;
     btn.addEventListener('click', () => selectFinderBerry(name));
     finderGridEl.appendChild(btn);
+  });
+
+  finderBerrySearch.addEventListener('input', () => {
+    const q = finderBerrySearch.value.trim().toLowerCase();
+    document.querySelectorAll('.finder-berry-btn').forEach(b => {
+      b.hidden = !b.dataset.berry.toLowerCase().includes(q);
+    });
   });
 
   function renderFinderEntry(entry, berryName) {
