@@ -656,6 +656,13 @@
   const baseBerries = toBerryObjs(BASE_BERRIES, name => VENDOR_BERRIES.has(name) ? 'Vendor' : '—');
   const hyperBerries = toBerryObjs(HYPER_BERRIES, hyperLoc);
 
+  const BERRY_LOC = new Map([...baseBerries, ...hyperBerries].map(b => [b.name, b.loc]));
+  function berryTierTag(name) {
+    const loc = BERRY_LOC.get(name);
+    if (!loc || loc === 'Vendor' || loc === '—') return '';
+    return `(${loc.replace(' / ', '-')}) `;
+  }
+
   let showingHyper = true;
   let berrySort = { key: 'idx', dir: 1 };
   let berryQuery = '';
@@ -791,7 +798,7 @@
   function berryPills(berries, highlightName) {
     return berries.map(([name, qty]) => `
       <span class="berry-pill${name === highlightName ? ' matched' : ''}">
-        <span class="berry-pill-name">${berryIcon(name)}${name}</span>
+        <span class="berry-pill-name">${berryIcon(name)}${berryTierTag(name)}${name}</span>
         <span class="berry-pill-qty">&times;${qty}</span>
       </span>
     `).join('');
@@ -881,7 +888,7 @@
     btn.type = 'button';
     btn.className = 'finder-berry-btn';
     btn.dataset.berry = name;
-    btn.innerHTML = `${berryIcon(name)}<span>${name.replace('Hyper ', '')}</span>`;
+    btn.innerHTML = `${berryIcon(name)}<span>${berryTierTag(name)}${name.replace('Hyper ', '')}</span>`;
     btn.addEventListener('click', () => selectFinderBerry(name));
     finderGridEl.appendChild(btn);
   });
