@@ -68,9 +68,8 @@
   }
   .note b { color: var(--text); }
 
-  .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
   .tab-btn {
-    flex: 1;
     font: inherit;
     font-weight: 700;
     font-size: 14px;
@@ -87,7 +86,7 @@
   .view.active { display: block; }
 
   .subtabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
-  .subtab-btn {
+  .subtab-btn, .guide-tab-btn {
     font: inherit;
     font-weight: 700;
     font-size: 12px;
@@ -99,7 +98,7 @@
     cursor: pointer;
     line-height: 1.25;
   }
-  .subtab-btn.active { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+  .subtab-btn.active, .guide-tab-btn.active { color: var(--bg); background: var(--accent); border-color: var(--accent); }
 
   .subview { display: none; }
   .subview.active { display: block; }
@@ -269,6 +268,37 @@
   .finder-heading:first-child { margin-top: 0; }
 
   .berry-pill.matched { border-color: var(--accent); background: rgba(63, 166, 255, 0.18); color: var(--accent); font-weight: 800; }
+
+  .guide-subview { display: none; }
+  .guide-subview.active { display: block; }
+  .guide-card {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .guide-title { font-size: 15px; font-weight: 800; margin: 0 0 6px; }
+  .guide-sub { font-size: 13px; font-weight: 700; color: var(--text); margin: 12px 0 4px; }
+  .guide-sub:first-child { margin-top: 0; }
+  .guide-text { font-size: 13px; color: var(--text-dim); line-height: 1.55; margin: 0 0 8px; }
+  .guide-text:last-child { margin-bottom: 0; }
+  .guide-list { margin: 0 0 8px; padding-left: 18px; font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+  .guide-list:last-child { margin-bottom: 0; }
+  .guide-list li { margin-bottom: 4px; }
+  .guide-list li:last-child { margin-bottom: 0; }
+  .guide-list b, .guide-text b { color: var(--text); }
+  .guide-tip {
+    background: rgba(63, 166, 255, 0.1);
+    border: 1px solid rgba(63, 166, 255, 0.3);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-top: 8px;
+  }
+  .guide-tip b { color: var(--accent); }
 </style>
 
 <div class="wrap">
@@ -285,6 +315,7 @@
       <button class="tab-btn" data-tab="recipes" type="button">Recipes</button>
       <button class="tab-btn" data-tab="berries" type="button">Berries</button>
       <button class="tab-btn" data-tab="powers" type="button">Flavor Powers</button>
+      <button class="tab-btn" data-tab="guide" type="button">Guide</button>
     </div>
 
     <div class="view" id="view-recipes">
@@ -362,6 +393,108 @@
       <div class="subtabs" id="power-flavor-tabs"></div>
       <div class="flavor-groups" id="flavor-groups"></div>
     </div>
+
+    <div class="view" id="view-guide">
+      <p class="recipe-section-desc">Farming and save-scumming strategy, condensed from <a href="https://www.reddit.com/r/PokemonZA/comments/1q2uxey/guide_how_to_effectively_farm_and_use_hyper/" target="_blank" rel="noopener" style="color:var(--accent)">a r/PokemonZA guide</a>.</p>
+      <div class="subtabs" id="guide-subtabs">
+        <button class="guide-tab-btn active" data-guide-tab="start" type="button">Getting Started</button>
+        <button class="guide-tab-btn" data-guide-tab="advanced" type="button">Advanced Farming</button>
+        <button class="guide-tab-btn" data-guide-tab="saves" type="button">Save Strategies</button>
+        <button class="guide-tab-btn" data-guide-tab="portals" type="button">Portal Tips</button>
+        <button class="guide-tab-btn" data-guide-tab="scoring" type="button">Flavor Scoring</button>
+      </div>
+
+      <div class="guide-subview active" id="guide-start">
+        <div class="guide-card">
+          <div class="guide-title">Starting Out and Building Reserves</div>
+          <p class="guide-text">Buy 100+ Colbur Berries from the vendor, then use 8&times; Colbur Berries per donut to make lots of 2★ donuts. Aim for Item: Berries + Big Haul Lv.1, but don't bother resetting for a perfect roll — you'll be making a lot of these, so just keep track of any with ideal bonuses and save them.</p>
+          <div class="guide-sub">Use those 2★ donuts for either (or both):</div>
+          <ul class="guide-list">
+            <li><b>Farm 3★ portals</b> — complete every task and grab the gold bonus ball at the end. Reload a backup save if you fail or land in a bad area. This is the best use for Item: Berries + Big Haul Lv.1 donuts specifically (though any 2★ donut works), and it's what gets you the best berries for farming 4★ portals next.</li>
+            <li><b>Farm 4★ portals</b> — skip the tasks and just pop as many floating Poké Balls as you can. Slower, but nets small amounts of the best 5★ berries.</li>
+          </ul>
+          <p class="guide-text">3★ portals give Hyper Shuca/Wacan (Items/Haul) and Hyper Chople/Occa (Sparkling/Alpha) Berries. Use those to make 4★ donuts so you can properly farm 4★ portals for 5★ berries (and shinies) — worth rerolling these for perfect bonuses.</p>
+          <p class="guide-text">Once you have enough Hyper Kasib/Tanga Berries for 5★ donuts, reroll until you land the exact bonuses you want. Spend your other 5★ berries on donuts for just clearing 5★ portals, then repeat the whole cycle as needed.</p>
+          <div class="guide-tip"><b>Note:</b> regular (non-Hyper) Roseli Berries don't seem to grant Sparkling Power, so don't farm them for that.</div>
+        </div>
+      </div>
+
+      <div class="guide-subview" id="guide-advanced">
+        <p class="recipe-section-desc">Once you have a good supply of Hyperspace Berries, use these to really rake in high-value berries.</p>
+        <div class="guide-card">
+          <div class="guide-title">Farming 4★ Wild Zones</div>
+          <p class="guide-text">Use 4★ donuts with Item: Berries + Big Haul to farm floating and gold Poké Balls in 4★ portals. 5★ donuts with those same bonuses can also farm 5★ wild-zone special-scan portals — but there's a better use for those (see Rogue Mega Arenas below).</p>
+        </div>
+        <div class="guide-card">
+          <div class="guide-title">Farming 4★ Battle Zones</div>
+          <p class="guide-text">Any other 4★ donut (not Items or Sparkling) works here. Focus on finding courier opponents — defeating them drops a large amount of valuable berries. Manually save after beating one but before interacting with them, so you can reload and retry if the reward isn't what you want. Floating Poké Balls are a secondary priority, and other trainers can drop rare Poké Balls, treasures, and Bottle Caps too.</p>
+          <div class="guide-tip">5★ battle-zone couriers give the less desirable top-tier berries (like Hyper Roseli), so 4★ battle zones are actually the better farm here.</div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-title">Farming 5★ Rogue Mega Arenas</div>
+          <p class="guide-text">One appears at a time, post-credits. Beat the boss inside for a gold Poké Ball full of valuable berries. Best done with 5★ donuts running Item: Berries Lv.3 + Big Haul Lv.2/3, but any non-Sparkling 5★ donut works to get started. You can't save between beating the boss and popping the ball, but you can manually save before entering the portal — reload, re-beat the boss, and try again for different berries. Rest at a bench to spawn another Rogue Mega Arena portal.</p>
+          <div class="guide-tip"><b>Pro tip — Rogue boss team:</b> lead with Gourgeist (Trick-or-Treat, Safeguard) to add Ghost typing to the boss and block additional-effect moves, then switch to Annihilape (holding a Shell Bell; Rage Fist, Focus Energy, Screech, Bulk Up). Open with Focus Energy, layer Screech + Bulk Up as needed, then spam Rage Fist. Less effective against bosses that naturally resist Ghost/Rage Fist, like Mega Tyranitar.</div>
+        </div>
+      </div>
+
+      <div class="guide-subview" id="guide-saves">
+        <div class="guide-card">
+          <div class="guide-title">Manual vs. Auto vs. Backup Saves</div>
+          <ul class="guide-list">
+            <li><b>Manual save</b> — saved by you on demand; gets overwritten by the next auto-save.</li>
+            <li><b>Auto save</b> — triggers on catching something, entering a portal, making a donut, and similar actions. Know what triggers this so it doesn't clobber a manual save you're relying on.</li>
+            <li><b>Backup save</b> — triggers on fast travel, and auto-saves never overwrite it. Restart the game and press <b>Up + X + B</b> on the title screen to load it — you'll land at the last Poké Center you fast-traveled from.</li>
+          </ul>
+        </div>
+        <div class="guide-card">
+          <div class="guide-title">How to Use Each Save</div>
+          <div class="guide-sub">Making donuts</div>
+          <p class="guide-text">Backup save before making a donut — if the bonuses aren't what you want, reload to get your ingredients back and try again.</p>
+          <div class="guide-sub">Resetting a portal</div>
+          <p class="guide-text">Backup save before entering — if you don't like the setup or tasks, or you mess up inside, reload to get the portal (and your donut) back and start over.</p>
+          <div class="guide-sub">Finding a gold Poké Ball</div>
+          <p class="guide-text">Manual save the instant you clear all tasks, then search for the gold ball. Failed? Reload the manual save and try again. Don't catch anything in the meantime — that triggers an auto-save and overwrites it.</p>
+          <div class="guide-sub">Catching a specific Pokémon</div>
+          <p class="guide-text">Manual save the moment you spot it. If the catch fails, reload — or, during the dizzy-catch window after defeating it, drop another manual save and try again from there. You can't save mid-battle with another Pokémon.</p>
+          <div class="guide-sub">Shiny hunting</div>
+          <p class="guide-text">Manual save without catching anything, then shiny-hunt (fast travel away and back, walk out of range, etc.). Run out of time? Reload the manual save. Fast-traveling to the portal entrance triggers an auto-save, so use a backup save to restart the loop if you're farming this way.</p>
+          <div class="guide-tip"><b>Pro tip:</b> a Sparkling Lv.3 donut guarantees a shiny in the portal. If you don't like the one you got, reload a backup save and try again — it can be any of the portal's possible spawns, so keep reloading until the one you want shows up.</div>
+        </div>
+      </div>
+
+      <div class="guide-subview" id="guide-portals">
+        <div class="guide-card">
+          <div class="guide-title">Focus Your Goal Per Portal</div>
+          <p class="guide-text">Time in a portal is limited, so decide your goal before going in and stick to it — use whatever time's left afterward for other things. Changed your mind or messed up? Reload a backup save and try again.</p>
+          <div class="guide-sub">Example goals</div>
+          <ul class="guide-list">
+            <li>Smash Poké Balls for items</li>
+            <li>Clear every task and grab the gold Poké Ball (research + items)</li>
+            <li>Catch specific Pokémon (Dex, Alpha, etc.)</li>
+            <li>Shiny hunt</li>
+          </ul>
+        </div>
+        <div class="guide-card">
+          <div class="guide-title">Portal Levels Matter</div>
+          <p class="guide-text">A portal's level gates several key things at once, so match it to what you're after:</p>
+          <ul class="guide-list">
+            <li>Which Pokémon can spawn — e.g. Rotom only appears in Level 5 special-scan portals.</li>
+            <li>Which berries can drop, tied directly to portal level (see the Berries tab).</li>
+            <li>Which Poké Balls and evolution items can drop from floating Poké Balls.</li>
+            <li>Which bonus rewards NPCs offer in battle-zone portals.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="guide-subview" id="guide-scoring">
+        <div class="guide-card">
+          <div class="guide-title">Hitting Flavor Power Thresholds</div>
+          <p class="guide-text">A flavor needs roughly <b>420+</b> to reliably roll a Level 3 bonus for that flavor, and roughly <b>700+</b> to roll two Level 3 bonuses at once (e.g. Sparkling 3 + Alpha 3 both need Sweet 700+). Those are the recipes worth aiming for, but plenty of other berry combos can still land a single Level 3 — or a solid Level 2 — bonus, which is still a good use of berries outside your best Tanga/Kasib stock.</p>
+          <p class="guide-text">When farming 4★ portals, a 4★ donut recipe is usually the more efficient use of berries — save your best 5★ donuts for 5★ portals. The one exception is Sparkling Power: a Level 3 roll is worth using anywhere, since it gives the best shiny odds regardless of portal level.</p>
+          <div class="guide-tip">Full per-flavor bonus effects and levels are on the <b>Flavor Powers</b> tab — Sweet, Spicy, Sour, Bitter, and Fresh each unlock a different set of powers as their score climbs.</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -418,24 +551,37 @@
     {
       id: 'shiny',
       group: 'Shiny & Alpha Hunting',
-      desc: 'High Sweet rolls Sparkling Power (Shiny) and Alpha Power; adding Fresh can also roll Encounter Power.',
+      desc: 'High Sweet rolls Sparkling Power (Shiny) and Alpha Power; adding Fresh can also roll Encounter Power. Sorted best Sweet total first.',
       combos: [
-        { berries: [['Hyper Haban', 8]], result: 'Sweet 680 &middot; Fresh 520' },
+        { berries: [['Hyper Tanga', 8]], result: 'Sweet 760' },
         { berries: [['Hyper Tanga', 4], ['Hyper Haban', 4]], result: 'Sweet 720 &middot; Fresh 260' },
+        { berries: [['Hyper Haban', 8]], result: 'Sweet 680 &middot; Fresh 520' },
         { berries: [['Hyper Haban', 3], ['Hyper Occa', 3], ['Hyper Tanga', 2]], result: 'Sweet 625 &middot; Fresh 270' },
+        { berries: [['Hyper Occa', 8]], result: 'Sweet 480' },
+        { berries: [['Hyper Chople', 8]], result: 'Sweet 440' },
+        { berries: [['Hyper Haban', 5], ['Hyper Payapa', 1], ['Hyper Charti', 1], ['Hyper Chilan', 1]], result: 'Sweet 430 &middot; Fresh 430' },
+        { berries: [['Hyper Haban', 5], ['Hyper Payapa', 1], ['Hyper Charti', 1], ['Hyper Babiri', 1]], result: 'Sweet 430 &middot; Fresh 430' },
+        { berries: [['Hyper Haban', 5], ['Hyper Payapa', 1], ['Hyper Charti', 1], ['Hyper Roseli', 1]], result: 'Sweet 430 &middot; Fresh 430' },
       ],
     },
     {
       id: 'item',
       group: 'Item Farming',
-      desc: 'High Sour rolls Big Haul Power and Item Power (pick the specific Item Power on reroll if it doesn’t land first try).',
+      desc: 'High Sour rolls Big Haul Power and Item Power (pick the specific Item Power on reroll if it doesn’t land first try). Sorted best Sour total first.',
       combos: [
         { berries: [['Hyper Kasib', 8]], result: 'Sour 760' },
         { berries: [['Hyper Kasib', 4], ['Hyper Roseli', 4]], result: 'Sour 720' },
+        { berries: [['Hyper Roseli', 8]], result: 'Sour 680 &middot; Spicy 520' },
         { berries: [['Hyper Kasib', 4], ['Hyper Colbur', 2], ['Hyper Babiri', 2]], result: 'Sour 640' },
+        { berries: [['Hyper Wacan', 8]], result: 'Sour 480' },
+        { berries: [['Hyper Roseli', 2], ['Hyper Payapa', 1], ['Hyper Kasib', 1], ['Hyper Colbur', 3]], result: 'Sour 470' },
+        { berries: [['Hyper Roseli', 2], ['Hyper Payapa', 1], ['Hyper Charti', 1], ['Hyper Colbur', 4]], result: 'Sour 445 &middot; Fresh 445' },
+        { berries: [['Hyper Roseli', 2], ['Hyper Payapa', 1], ['Hyper Charti', 1], ['Hyper Babiri', 4]], result: 'Sour 445 &middot; Bitter 445' },
+        { berries: [['Hyper Shuca', 8]], result: 'Sour 440' },
+        { berries: [['Hyper Roseli', 2], ['Hyper Payapa', 1], ['Hyper Colbur', 4], ['Hyper Coba', 1]], result: 'Sour 440 &middot; Fresh 440' },
+        { berries: [['Hyper Roseli', 5], ['Hyper Haban', 1], ['Hyper Charti', 1], ['Hyper Coba', 1]], result: 'Sour 430 &middot; Spicy 430' },
         { berries: [['Hyper Wacan', 6], ['Hyper Hondew', 1], ['Hyper Grepa', 1]], result: 'Sour 420' },
         { berries: [['Hyper Kasib', 3], ['Hyper Colbur', 2], ['Hyper Chilan', 2]], result: 'Sour 415' },
-        { berries: [['Hyper Roseli', 2], ['Hyper Payapa', 1], ['Hyper Kasib', 1], ['Hyper Colbur', 3]], result: 'Sour 470' },
       ],
     },
     {
@@ -798,6 +944,14 @@
       document.querySelectorAll('.subtab-btn').forEach(b => b.classList.toggle('active', b === btn));
       document.querySelectorAll('.subview').forEach(v => v.classList.remove('active'));
       document.getElementById(`subview-${btn.dataset.subtab}`).classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.guide-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.guide-tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.guide-subview').forEach(v => v.classList.remove('active'));
+      document.getElementById(`guide-${btn.dataset.guideTab}`).classList.add('active');
     });
   });
 
