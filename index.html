@@ -156,6 +156,7 @@
 
   .flavor-cell { color: var(--text-dim); }
   .flavor-cell.hi { color: var(--text); font-weight: 700; }
+  .loc-cell { color: var(--text-dim); font-size: 12px; }
 
   .badge {
     display: inline-block;
@@ -380,6 +381,7 @@
               <th data-key="level">Level</th>
               <th data-key="cal">Cal.</th>
               <th data-key="dom">Flavor</th>
+              <th data-key="loc">Location</th>
             </tr>
           </thead>
           <tbody id="berry-tbody"></tbody>
@@ -627,18 +629,32 @@
     return slug ? `<img class="donut-pic" src="icons/donuts/${slug}.png" alt="${name}" loading="lazy" />` : '';
   }
 
-  function toBerryObjs(rows) {
+  function toBerryObjs(rows, locFn) {
     return rows.map((r, idx) => {
       const [name, sweet, spicy, sour, bitter, fresh, level, cal] = r;
       const vals = { sweet, spicy, sour, bitter, fresh };
       const max = Math.max(sweet, spicy, sour, bitter, fresh);
       const dom = max === 0 ? [] : FLAVORS.filter(f => vals[f] === max);
-      return { name, sweet, spicy, sour, bitter, fresh, level, cal, dom, idx };
+      const loc = locFn ? locFn(name, idx) : '—';
+      return { name, sweet, spicy, sour, bitter, fresh, level, cal, dom, idx, loc };
     });
   }
 
-  const baseBerries = toBerryObjs(BASE_BERRIES);
-  const hyperBerries = toBerryObjs(HYPER_BERRIES);
+  // Location data from the r/PokemonZA farming guide's berry chart. Base
+  // Berries only cover the 8 used in this app's recipes (the source chart
+  // doesn't list the rest); Hyper Berry portal tiers line up exactly with
+  // the array order above, so they're derived from position instead of name.
+  const VENDOR_BERRIES = new Set(['Tanga', 'Charti', 'Kasib', 'Haban', 'Colbur', 'Babiri', 'Chilan', 'Roseli']);
+  function hyperLoc(name, idx) {
+    if (idx <= 4) return '1★';
+    if (idx <= 8) return '1★ / 2★';
+    if (idx <= 12) return '2★';
+    if (idx <= 22) return '3★';
+    return '4★';
+  }
+
+  const baseBerries = toBerryObjs(BASE_BERRIES, name => VENDOR_BERRIES.has(name) ? 'Vendor' : '—');
+  const hyperBerries = toBerryObjs(HYPER_BERRIES, hyperLoc);
 
   let showingHyper = true;
   let berrySort = { key: 'idx', dir: 1 };
@@ -672,6 +688,7 @@
         <td>+${b.level}</td>
         <td>${b.cal}</td>
         <td>${b.dom.map(f => `<span class="badge ${f}">${FLAVOR_LABEL[f]}</span>`).join(' ')}</td>
+        <td class="loc-cell">${b.loc}</td>
       `;
       berryTbody.appendChild(tr);
     });
